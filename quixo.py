@@ -4,3 +4,7 @@ class Quixo:
 
     def opponentPlay(self):
         print('Opponent Plays')    
+
+quixo = Quixo()
+quixo.playerPlay()
+quixo.opponentPlay()
