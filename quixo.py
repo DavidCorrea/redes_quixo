@@ -29,7 +29,7 @@ class Quixo:
     # Jugadas -> Tuplas entre 1 y 20 - (en_que_posicion_se_remueve, en_que_posicion_se_agrega)
 
     NO_TOKEN = ' '
-    PLAYER_TOKEN = 'O'
+    PLAYER_TOKEN = '0'
     OPPONENT_TOKEN = 'X'
 
     def __init__(self):
