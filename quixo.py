@@ -1,74 +1,70 @@
-def alphabeta(node, depth, alpha, beta, player):
-    if depth == 0 or game_over(node):
-        return h(node)
-    if player == MAX :
-        value = - inf
-        for move in valid_moves(node):
-            child = play(node, move)
-            value = max(value, alphabeta(child, depth - 1, alpha, beta, -player))
-            alpha = max(alpha, value)
-            if alpha >= beta :
-                break # Beta cut - off
-        return value
-    else:
-        value = inf
-        for move in valid_moves(node):
-            child = play(node, move)
-            value = min(value, alphabeta(child, depth - 1, alpha, beta, -player))
-            beta = min ( beta , value )
-            if alpha >= beta :
-                break # Alpha cut - off
-        return value
-
-def new_tile(index):
-    return { 'index': index, 'content': Quixo.NO_TOKEN }
+from quixo_board import QuixoBoard, Piece
+from math import inf
 
 class Quixo:
-    # Tablero de 5 x 5
-    # Jugadas -> Tuplas entre 1 y 20 - (en_que_posicion_se_remueve, en_que_posicion_se_agrega)
-
-    NO_TOKEN = ' '
-    PLAYER_TOKEN = '0'
-    OPPONENT_TOKEN = 'X'
+    MAX = 1
 
     def __init__(self):
-        self.board = [
-            [new_tile(1),  new_tile(2),  new_tile(3),  new_tile(4),  new_tile(5)],
-            [new_tile(16), new_tile(17), new_tile(18), new_tile(19), new_tile(6)],
-            [new_tile(15), new_tile(24), new_tile(25), new_tile(20), new_tile(7)],
-            [new_tile(14), new_tile(23), new_tile(22), new_tile(21), new_tile(8)],
-            [new_tile(13), new_tile(12), new_tile(11), new_tile(10), new_tile(9)]
-        ]
+        self.board = QuixoBoard()
 
-    def playerPlay(self):
-        print('Actualizar Tablero')
-        (0, 0) # Jugada valida que da .alphabeta
+    def player_play(self):
+        my_play, _ = self.__alphabeta(self.board, 3, inf, -inf, 1)
+        print("IA Plays " + str(my_play))
+        self.board.switch_pieces(my_play[0], my_play[1], Piece.PLAYER_TOKEN)
+        print(self.board)
 
-    # play es una tupla: (en_que_posicion_se_remueve, en_que_posicion_se_agrega)
-    def opponentPlay(self, play):
-        tile_to_remove = play[0]
-        tile_to_add = play[1]
+    def opponent_play(self, play):
+        print("Human Plays " + str(play))
+        self.board.switch_pieces(play[0], play[1], Piece.OPPONENT_TOKEN)
+        print(self.board)
 
-        # Inicialización coordenadas
-        tile_to_remove_coordinate = (0, 0)
-        tile_to_add_coordinate = (0, 0)
+    def __game_over(self, current_board):
+        return current_board.is_finished()
 
-        # Busco en que coordenadas estan las fichas
-        for y, row in enumerate(self.board):
-            for x, column in enumerate(row):
-                if column['index'] == tile_to_remove:
-                    tile_to_remove_coordinate = (x, y)
-                if column['index'] == tile_to_add:
-                    tile_to_add_coordinate = (x, y)
+    def __valid_moves(self, current_board):
+        return current_board.valid_moves(Piece.PLAYER_TOKEN)
 
-        # Identificar el tipo de movimiento (Invalido, debo mover columna, debo mover fila)
-        has_to_move_column = tile_to_add_coordinate[0] == tile_to_remove_coordinate[0]
-        has_to_move_row = tile_to_add_coordinate[1] == tile_to_remove_coordinate[1]
-        is_invalid_play = not has_to_move_column and not has_to_move_row
+    def __play(self, current_board, valid_move):
+        current_board.switch_pieces(valid_move[0], valid_move[1], Piece.PLAYER_TOKEN)
+        return current_board
+        
+    def __h(self, current_board): # Heuristica
+        return 1
 
-        print('Has to move Column: ' + str(has_to_move_column))
-        print('Has to move Row: ' + str(has_to_move_row))
-        print('Invalid Play: ' + str(is_invalid_play))
+    def __alphabeta(self, node, depth, alpha, beta, player):
+        if depth == 0 or self.__game_over(node):
+            return None, self.__h(node)
+        if player == Quixo.MAX:
+            value = -inf
+            best_move = None
+            for move in self.__valid_moves(node):
+                child = self.__play(node, move)
+                best_move = move
+                value = max(value, self.__alphabeta(child, depth - 1, alpha, beta, -player)[1])
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break # Beta cut-off
+            return best_move, value
+        else:
+            value = inf
+            best_move = None
+            for move in self.__valid_moves(node):
+                child = self.__play(node , move)
+                best_move = move
+                value = min(value, self.__alphabeta(child , depth - 1, alpha, beta , -player)[1])
+                beta  = min(beta , value)
+                if alpha >= beta:
+                    break # Alpha cut-off
+            return best_move, value
 
-quixo = Quixo()
-quixo.opponentPlay(( 5, 9 ))
+def main():
+    quixo = Quixo()
+
+    while(True):
+        quixo.player_play()
+
+        from_input = int(input("From: "))
+        to_input = int(input("To: "))
+        quixo.opponent_play((from_input, to_input))
+
+main()           
