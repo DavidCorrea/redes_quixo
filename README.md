@@ -10,5 +10,5 @@ python3 ./quixo.py
 
 ### Para correr los tests
 ```
-python3 -m unittest quixo_board_test
+python3 -m unittest -v quixo_board_test
 ```
