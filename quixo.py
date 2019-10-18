@@ -8,7 +8,7 @@ class Quixo:
         self.board = QuixoBoard()
 
     def player_play(self):
-        my_play, _ = self.__alphabeta(self.board, 3, inf, -inf, 1)
+        my_play, _ = self.__alphabeta(self.board, 1, inf, -inf, 1)
         print("IA Plays " + str(my_play))
         self.board.switch_pieces(my_play[0], my_play[1], Piece.PLAYER_TOKEN)
         print(self.board)
