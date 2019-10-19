@@ -57,18 +57,4 @@ class Quixo:
                 beta  = min(beta , value)
                 if alpha >= beta:
                     break # Alpha cut-off
-            return best_move, value
-
-def main():
-    quixo = Quixo()
-
-    while(True):
-        quixo.player_play()
-        print(quixo.board)
-
-        from_input = int(input("From: "))
-        to_input = int(input("To: "))
-        quixo.opponent_play((from_input, to_input))
-        print(quixo.board)
-
-main()           
+            return best_move, value          

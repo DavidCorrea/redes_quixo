@@ -1,4 +1,5 @@
 import copy
+import random
 from math import inf
 
 class Piece:
@@ -165,7 +166,7 @@ def __play(current_board, valid_move):
     return board
     
 def __h(current_board): # Heuristica
-    return 1
+    return int(random.uniform(0, 1) * 100)
 
 def __alphabeta(node, depth, alpha, beta, player):
     if depth == 0 or __game_over(node):
@@ -175,8 +176,13 @@ def __alphabeta(node, depth, alpha, beta, player):
         best_move = None
         for move in __valid_moves(node):
             child = __play(node, move)
-            best_move = move
-            value = max(value, __alphabeta(child, depth - 1, alpha, beta, -player)[1])
+            _, deep_value = __alphabeta(child , depth - 1, alpha, beta , -player)
+
+            # ¿Si?
+            if(deep_value > value):
+                best_move = move
+
+            value = max(value, deep_value)
             alpha = max(alpha, value)
             if alpha >= beta:
                 break # Beta cut-off
@@ -186,8 +192,13 @@ def __alphabeta(node, depth, alpha, beta, player):
         best_move = None
         for move in __valid_moves(node):
             child = __play(node , move)
-            best_move = move
-            value = min(value, __alphabeta(child , depth - 1, alpha, beta , -player)[1])
+            _, deep_value = __alphabeta(child , depth - 1, alpha, beta , -player)
+            
+            # ¿Si?
+            if(deep_value < value):
+                best_move = move
+
+            value = min(value, deep_value)
             beta  = min(beta , value)
             if alpha >= beta:
                 break # Alpha cut-off
@@ -199,7 +210,7 @@ _board = QuixoBoard()
 
 def player_play():
     board = copy.deepcopy(_board)
-    my_play, _ = __alphabeta(board, 1, -inf, inf, 1)
+    my_play, _ = __alphabeta(board, 1, -inf, inf, MAX)
 
     print("Player Plays " + str(my_play))
     _board.switch_pieces(my_play[0], my_play[1], Piece.PLAYER_TOKEN)
@@ -220,4 +231,4 @@ def main():
         opponent_play((from_input, to_input))
         print(_board)
 
-main()   
+main()
