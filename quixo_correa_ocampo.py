@@ -1,3 +1,6 @@
+import copy
+from math import inf
+
 class Piece:
     NO_TOKEN = ' '
     PLAYER_TOKEN = 'O'
@@ -145,3 +148,76 @@ class QuixoBoard:
 
     def __column_on_index(self, index):
         return map(lambda row: row[index], self.board)
+
+###############################################################
+
+MAX = 1
+
+def __game_over(current_board):
+    return current_board.is_finished()
+
+def __valid_moves(current_board):
+    return current_board.valid_moves(Piece.PLAYER_TOKEN)
+
+def __play(current_board, valid_move):
+    board = copy.deepcopy(current_board)
+    board.switch_pieces(valid_move[0], valid_move[1], Piece.PLAYER_TOKEN)
+    return board
+    
+def __h(current_board): # Heuristica
+    return 1
+
+def __alphabeta(node, depth, alpha, beta, player):
+    if depth == 0 or __game_over(node):
+        return None, __h(node)
+    if player == MAX:
+        value = -inf
+        best_move = None
+        for move in __valid_moves(node):
+            child = __play(node, move)
+            best_move = move
+            value = max(value, __alphabeta(child, depth - 1, alpha, beta, -player)[1])
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break # Beta cut-off
+        return best_move, value
+    else:
+        value = inf
+        best_move = None
+        for move in __valid_moves(node):
+            child = __play(node , move)
+            best_move = move
+            value = min(value, __alphabeta(child , depth - 1, alpha, beta , -player)[1])
+            beta  = min(beta , value)
+            if alpha >= beta:
+                break # Alpha cut-off
+        return best_move, value
+
+###############################################################
+
+_board = QuixoBoard()
+
+def player_play():
+    board = copy.deepcopy(_board)
+    my_play, _ = __alphabeta(board, 1, -inf, inf, 1)
+
+    print("Player Plays " + str(my_play))
+    _board.switch_pieces(my_play[0], my_play[1], Piece.PLAYER_TOKEN)
+
+def opponent_play(play):
+    print("Opponent Plays " + str(play))
+    _board.switch_pieces(play[0], play[1], Piece.OPPONENT_TOKEN)
+
+###############################################################
+
+def main():
+    while(True):
+        player_play()
+        print(_board)
+
+        from_input = int(input("From: "))
+        to_input = int(input("To: "))
+        opponent_play((from_input, to_input))
+        print(_board)
+
+main()   

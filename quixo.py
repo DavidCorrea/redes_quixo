@@ -1,3 +1,4 @@
+import copy
 from quixo_board import QuixoBoard, Piece
 from math import inf
 
@@ -8,15 +9,15 @@ class Quixo:
         self.board = QuixoBoard()
 
     def player_play(self):
-        my_play, _ = self.__alphabeta(self.board, 1, inf, -inf, 1)
-        print("IA Plays " + str(my_play))
+        board = copy.deepcopy(self.board)
+        my_play, _ = self.__alphabeta(board, 1, -inf, inf, 1)
+
+        print("Player Plays " + str(my_play))
         self.board.switch_pieces(my_play[0], my_play[1], Piece.PLAYER_TOKEN)
-        print(self.board)
 
     def opponent_play(self, play):
-        print("Human Plays " + str(play))
+        print("Opponent Plays " + str(play))
         self.board.switch_pieces(play[0], play[1], Piece.OPPONENT_TOKEN)
-        print(self.board)
 
     def __game_over(self, current_board):
         return current_board.is_finished()
@@ -25,8 +26,9 @@ class Quixo:
         return current_board.valid_moves(Piece.PLAYER_TOKEN)
 
     def __play(self, current_board, valid_move):
-        current_board.switch_pieces(valid_move[0], valid_move[1], Piece.PLAYER_TOKEN)
-        return current_board
+        board = copy.deepcopy(current_board)
+        board.switch_pieces(valid_move[0], valid_move[1], Piece.PLAYER_TOKEN)
+        return board
         
     def __h(self, current_board): # Heuristica
         return 1
@@ -62,9 +64,11 @@ def main():
 
     while(True):
         quixo.player_play()
+        print(quixo.board)
 
         from_input = int(input("From: "))
         to_input = int(input("To: "))
         quixo.opponent_play((from_input, to_input))
+        print(quixo.board)
 
 main()           
