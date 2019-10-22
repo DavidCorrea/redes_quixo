@@ -1,6 +1,7 @@
 import copy
-from quixo_board import QuixoBoard, Piece
+import random
 from math import inf
+from quixo_board import QuixoBoard, Piece
 
 class Quixo:
     MAX = 1
@@ -12,11 +13,9 @@ class Quixo:
         board = copy.deepcopy(self.board)
         my_play, _ = self.__alphabeta(board, 1, -inf, inf, 1)
 
-        print("Player Plays " + str(my_play))
         self.board.switch_pieces(my_play[0], my_play[1], Piece.PLAYER_TOKEN)
 
     def opponent_play(self, play):
-        print("Opponent Plays " + str(play))
         self.board.switch_pieces(play[0], play[1], Piece.OPPONENT_TOKEN)
 
     def __game_over(self, current_board):
@@ -31,7 +30,7 @@ class Quixo:
         return board
         
     def __h(self, current_board): # Heuristica
-        return 1
+        return int(random.uniform(0, 1) * 100)
 
     def __alphabeta(self, node, depth, alpha, beta, player):
         if depth == 0 or self.__game_over(node):
@@ -41,7 +40,11 @@ class Quixo:
             best_move = None
             for move in self.__valid_moves(node):
                 child = self.__play(node, move)
-                best_move = move
+                _, deep_value = self.__alphabeta(child , depth - 1, alpha, beta , -player)
+
+                if(deep_value > value):
+                    best_move = move
+
                 value = max(value, self.__alphabeta(child, depth - 1, alpha, beta, -player)[1])
                 alpha = max(alpha, value)
                 if alpha >= beta:
@@ -52,7 +55,11 @@ class Quixo:
             best_move = None
             for move in self.__valid_moves(node):
                 child = self.__play(node , move)
-                best_move = move
+                _, deep_value = self.__alphabeta(child , depth - 1, alpha, beta , -player)
+
+                if(deep_value < value):
+                    best_move = move
+                    
                 value = min(value, self.__alphabeta(child , depth - 1, alpha, beta , -player)[1])
                 beta  = min(beta , value)
                 if alpha >= beta:

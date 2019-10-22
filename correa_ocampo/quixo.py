@@ -1,8 +1,14 @@
+import copy
+import random
 from itertools import chain
+from math import inf
+
+###############################################################
 
 def flatten(listOfLists):
-    "Flatten one level of nesting"
     return chain.from_iterable(listOfLists)
+
+###############################################################
 
 class Piece:
     NO_TOKEN = ' '
@@ -24,6 +30,8 @@ class Piece:
 
     def is_not_taken(self):
         return self.token == Piece.NO_TOKEN
+
+###############################################################
 
 class QuixoBoard:
     def __init__(self):
@@ -107,18 +115,15 @@ class QuixoBoard:
         return list(filter(lambda move: move[0] != move[1], list(dict.fromkeys(moves)))) # Lista de tuplas
 
     def player_has_four_pieces_together(self, player):
+        # TODO
         return False
 
     def player_has_three_pieces_together(self, player):
+        # TODO
         return False
 
     def player_has_two_pieces_together(self, player):
-        all_pieces = list(flatten(list(map(lambda column: column, map(lambda row: row, self.board)))))
-        all_player_pieces = list(filter(lambda piece: piece.token == player, all_pieces))
-
-        # Row
-        # Column
-        # Diagonal
+        # TODO
         return False
 
     def is_center_piece_free(self):
@@ -177,3 +182,111 @@ class QuixoBoard:
 
     def __column_on_index(self, index):
         return map(lambda row: row[index], self.board)
+
+###############################################################
+
+class Quixo:
+    def __init__(self):
+        self.board = QuixoBoard()
+    
+    def playerPlay(self):
+        player_move, _ = self.__alphabeta(self.board, 1, -inf, inf, Piece.PLAYER_TOKEN)
+        print("Player Move: " + str(player_move))
+        self.__move_for_player(self.board, player_move, Piece.PLAYER_TOKEN)
+        self.__check_victory(Piece.PLAYER_TOKEN)
+        return player_move
+
+    def opponentPlay(self, move):
+        print("Opponent Play: " + str(move))
+        self.__move_for_player(self.board, move, Piece.OPPONENT_TOKEN)
+        self.__check_victory(Piece.OPPONENT_TOKEN)
+
+    def play(self, time):
+        return self.playerPlay()
+
+    def update(self, move):
+        self.opponentPlay(move)
+
+    def __check_victory(self, token):
+        if(self.__game_over(self.board)):
+            print(self.board)
+            raise BaseException(token + "'s won!")    
+    
+    def __game_over(self, board):
+        return board.has_any_player_won()
+
+    def __valid_moves(self, board, player_token):
+        return board.valid_moves_for_player(player_token)
+
+    def __move_for_player(self, board, move, player_token):
+        move_from = move[0]
+        move_to = move[1]
+        board.switch_pieces(move_from, move_to, player_token)
+
+    def __play(self, board, valid_move, player_token):
+        board_copy = copy.deepcopy(board)
+        self.__move_for_player(board_copy, valid_move, player_token)
+        return board_copy
+        
+    def __h(self, board, player):
+        if board.player_has_four_pieces_together(player):
+            return 10
+        if(board.player_has_three_pieces_together(player)):
+            return 9
+        if(board.player_has_two_pieces_together(player)):
+            return 8
+        if(board.is_center_piece_free()):
+            return 7
+        if(board.has_a_corner_free()):
+            return 6
+        return int(random.uniform(0, 0.5) * 10)
+
+    def __alphabeta(self, node, depth, alpha, beta, player):
+        if depth == 0 or self.__game_over(node):
+            return None, self.__h(node, player)
+        if player == Piece.PLAYER_TOKEN:
+            value = -inf
+            best_move = None
+            for move in self.__valid_moves(node, Piece.PLAYER_TOKEN):
+                child = self.__play(node, move, Piece.PLAYER_TOKEN)
+                _, deep_value = self.__alphabeta(child , depth - 1, alpha, beta , Piece.OPPONENT_TOKEN)
+
+                if(deep_value > value):
+                    best_move = move
+
+                value = max(value, deep_value)
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break # Beta cut-off
+            return best_move, value
+        else:
+            value = inf
+            best_move = None
+            for move in self.__valid_moves(node, Piece.OPPONENT_TOKEN):
+                child = self.__play(node, move, Piece.OPPONENT_TOKEN)
+                _, deep_value = self.__alphabeta(child , depth - 1, alpha, beta , Piece.PLAYER_TOKEN)
+
+                if(deep_value < value):
+                    best_move = move
+
+                value = min(value, deep_value)
+                beta  = min(beta , value)
+                if alpha >= beta:
+                    break # Alpha cut-off
+            return best_move, value
+
+###############################################################
+
+# def main():
+#     quixo = Quixo()
+
+#     while(True):
+#         quixo.playerPlay()
+#         print(quixo.board)
+
+#         from_input = int(input("From: "))
+#         to_input = int(input("To: "))
+#         quixo.opponentPlay((from_input, to_input))
+#         print(quixo.board)
+
+# main()
