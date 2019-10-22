@@ -1,6 +1,8 @@
 import unittest
 from quixo_board import QuixoBoard, Piece
 
+# Outdated
+
 class TestQuixo(unittest.TestCase):
     def setUp(self):
         self.quixo_board = QuixoBoard()
