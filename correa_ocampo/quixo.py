@@ -114,17 +114,14 @@ class QuixoBoard:
 
         return list(filter(lambda move: move[0] != move[1], list(dict.fromkeys(moves)))) # Lista de tuplas
 
-    def player_has_four_pieces_together(self, player):
-        # TODO
-        return False
+    def player_has_four_pieces_in_row_or_column(self, player):
+        return self.__player_has_n_pieces_in_row_or_column(player, 4)
 
-    def player_has_three_pieces_together(self, player):
-        # TODO
-        return False
+    def player_has_three_pieces_in_row_or_column(self, player):
+        return self.__player_has_n_pieces_in_row_or_column(player, 3)
 
-    def player_has_two_pieces_together(self, player):
-        # TODO
-        return False
+    def player_has_two_pieces_in_row_or_column(self, player):
+        return self.__player_has_n_pieces_in_row_or_column(player, 2)
 
     def is_center_piece_free(self):
         center_piece = self.piece_at(2, 2)
@@ -133,6 +130,11 @@ class QuixoBoard:
     def has_a_corner_free(self):
         corner_pieces = [self.piece_at(0, 0), self.piece_at(0, 4), self.piece_at(4, 0), self.piece_at(4, 4)]
         return any(corner_piece.is_not_taken() for corner_piece in corner_pieces)
+
+    def __player_has_n_pieces_in_row_or_column(self, player, count):
+        player_has_n_pieces_in_row = any(len(list(filter(lambda piece: piece == player, row))) == count for row in self.board)
+        player_has_n_pieces_in_column = any(len(list(filter(lambda piece: piece == player, self.__column_on_index(y)))) == count for y, row in enumerate(self.board))
+        return player_has_n_pieces_in_row or player_has_n_pieces_in_column
 
     def __search_coordinates_for_piece(self, piece_number_being_searched):
         for y, row in enumerate(self.board):
@@ -229,11 +231,11 @@ class Quixo:
         return board_copy
         
     def __h(self, board, player):
-        if board.player_has_four_pieces_together(player):
+        if board.player_has_four_pieces_in_row_or_column(player):
             return 10
-        if(board.player_has_three_pieces_together(player)):
+        if(board.player_has_three_pieces_in_row_or_column(player)):
             return 9
-        if(board.player_has_two_pieces_together(player)):
+        if(board.player_has_two_pieces_in_row_or_column(player)):
             return 8
         if(board.is_center_piece_free()):
             return 7
