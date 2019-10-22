@@ -49,6 +49,8 @@ class QuixoBoard:
     def piece_at(self, x, y):
         return self.board[y][x]
 
+    # (6, ' ') => (6, 'X')
+    # (9, 'X') => (9, ' ')
     def switch_pieces(self, selected_piece_number, piece_number_to_replace, token):
         selected_piece_coordinates = self.__search_coordinates_for_piece(selected_piece_number)
         piece_to_replace_coordinates = self.__search_coordinates_for_piece(piece_number_to_replace)
@@ -172,13 +174,16 @@ class QuixoBoard:
     def __index_is_not_in_the_limits(self, index):
         return index != 0 and index != 4 # Hack-ish.
 
-    def __move_piece_from_to(self, list, from_index, to_index, token):
-        piece_to_move = list[from_index]
+    def __move_piece_from_to(self, list_x, from_index, to_index, token):
+        previous_numbers = list(map(lambda piece: piece.number, list_x))
+        piece_to_move = list_x[from_index]
 
         if piece_to_move.token == Piece.NO_TOKEN or token == piece_to_move.token:
             piece_to_move.token = token
-            list.remove(piece_to_move)
-            list.insert(to_index, piece_to_move)
+            list_x.remove(piece_to_move)
+            list_x.insert(to_index, piece_to_move)
+            for i, previous_number in enumerate(previous_numbers):
+                list_x[i].number = previous_number
         else:
             raise BaseException("Invalid Move: You can only move empty pieces or your own pieces!")
 
@@ -279,16 +284,16 @@ class Quixo:
 
 ###############################################################
 
-# def main():
-#     quixo = Quixo()
+def main():
+    quixo = Quixo()
 
-#     while(True):
-#         quixo.playerPlay()
-#         print(quixo.board)
+    while(True):
+        quixo.playerPlay()
+        print(quixo.board)
 
-#         from_input = int(input("From: "))
-#         to_input = int(input("To: "))
-#         quixo.opponentPlay((from_input, to_input))
-#         print(quixo.board)
+        from_input = int(input("From: "))
+        to_input = int(input("To: "))
+        quixo.opponentPlay((from_input, to_input))
+        print(quixo.board)
 
-# main()
+main()
