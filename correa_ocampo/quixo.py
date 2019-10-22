@@ -195,13 +195,13 @@ class Quixo:
         player_move, _ = self.__alphabeta(self.board, 1, -inf, inf, Piece.PLAYER_TOKEN)
         print("Player Move: " + str(player_move))
         self.__move_for_player(self.board, player_move, Piece.PLAYER_TOKEN)
-        self.__check_victory(Piece.PLAYER_TOKEN)
+        # self.__check_victory(Piece.PLAYER_TOKEN)
         return player_move
 
     def opponentPlay(self, move):
         print("Opponent Play: " + str(move))
         self.__move_for_player(self.board, move, Piece.OPPONENT_TOKEN)
-        self.__check_victory(Piece.OPPONENT_TOKEN)
+        # self.__check_victory(Piece.OPPONENT_TOKEN)
 
     def play(self, time):
         return self.playerPlay()
